@@ -174,7 +174,7 @@ class OptionsManager {
     if (this.statusElement) {
       this.statusElement.classList.add("visible");
       setTimeout(() => {
-        this.statusElement.classList.remove("visible");
+        this.statusElement?.classList.remove("visible");
       }, 1500);
     }
   }

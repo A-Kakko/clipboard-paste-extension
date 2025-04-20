@@ -73,8 +73,9 @@ class BackgroundService {
 
       for (const key in DEFAULT_SETTINGS.paste) {
         if (currentSettings.paste[key as keyof PasteSettings] === undefined) {
-          updatedPaste[key as keyof PasteSettings] =
-            DEFAULT_SETTINGS.paste[key as keyof PasteSettings];
+          const updatedPaste: Partial<PasteSettings> =
+            {} as Partial<PasteSettings>;
+          DEFAULT_SETTINGS.paste[key as keyof PasteSettings];
           pastesNeedsUpdate = true;
         }
       }
@@ -99,8 +100,9 @@ class BackgroundService {
           currentSettings.appearance[key as keyof AppearanceSettings] ===
           undefined
         ) {
-          updatedAppearance[key as keyof AppearanceSettings] =
-            DEFAULT_SETTINGS.appearance[key as keyof AppearanceSettings];
+          const updatedAppearance: Partial<AppearanceSettings> =
+            {} as Partial<AppearanceSettings>;
+          DEFAULT_SETTINGS.appearance[key as keyof AppearanceSettings];
           appearanceNeedsUpdate = true;
         }
       }
