@@ -72,6 +72,87 @@
       }
     </style>
   </head>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // メニュー要素を作成
+      const menuElement = document.createElement("div");
+      menuElement.className = "context-menu";
+      menuElement.style.cssText = `
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        padding: 5px 0;
+        min-width: 150px;
+        z-index: 1000;
+        display: none;
+      `;
+      document.body.appendChild(menuElement);
+
+      // メニュー項目を作成
+      const pasteItem = document.createElement("div");
+      pasteItem.style.cssText = `
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 14px;
+      `;
+      pasteItem.textContent = "貼り付け";
+      pasteItem.addEventListener("mouseenter", () => {
+        pasteItem.style.backgroundColor = "#f0f0f0";
+      });
+      pasteItem.addEventListener("mouseleave", () => {
+        pasteItem.style.backgroundColor = "";
+      });
+      pasteItem.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        try {
+          const text = await navigator.clipboard.readText();
+          if (
+            currentTarget &&
+            (currentTarget instanceof HTMLInputElement ||
+              currentTarget instanceof HTMLTextAreaElement)
+          ) {
+            currentTarget.value = currentTarget.value + text;
+          }
+        } catch (err) {
+          console.error("クリップボードの読み取りに失敗しました:", err);
+        }
+        hideMenu();
+      });
+
+      menuElement.appendChild(pasteItem);
+
+      // 現在ターゲットのテキスト欄
+      let currentTarget = null;
+
+      // テキスト欄を取得してイベントリスナーを追加
+      const textInputs = document.querySelectorAll(
+        'input[type="text"], textarea'
+      );
+      textInputs.forEach((element) => {
+        element.addEventListener("click", (event) => {
+          const target = event.target;
+          currentTarget = target;
+          const rect = target.getBoundingClientRect();
+
+          // メニューを表示
+          menuElement.style.left = `${rect.left}px`;
+          menuElement.style.top = `${rect.bottom}px`;
+          menuElement.style.display = "block";
+
+          event.stopPropagation();
+        });
+      });
+
+      // ドキュメントクリックでメニューを閉じる
+      document.addEventListener("click", hideMenu);
+
+      function hideMenu() {
+        menuElement.style.display = "none";
+      }
+    });
+  </script>
   <body>
     <h1>クリップボード拡張機能テストページ</h1>
 
