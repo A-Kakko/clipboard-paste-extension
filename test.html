@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>クリップボード拡張機能テストページ</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+      }
+      h1 {
+        color: #4285f4;
+        margin-bottom: 20px;
+      }
+      .section {
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      .textarea-container {
+        margin-bottom: 15px;
+      }
+      textarea {
+        width: 100%;
+        height: 100px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-family: inherit;
+        resize: vertical;
+      }
+      button {
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+      }
+      button:hover {
+        background-color: #3367d6;
+      }
+      .status {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #e8f0fe;
+        border-radius: 4px;
+      }
+      .test-cases {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .test-case {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      .test-case:hover {
+        background-color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>クリップボード拡張機能テストページ</h1>
+
+    <div class="section">
+      <h2>テスト方法</h2>
+      <p>
+        このページでは、クリップボード監視機能と貼り付けメニュー表示をテストできます。
+      </p>
+      <ol>
+        <li>テキストをテキストエリアに入力し、「コピー」ボタンを押します</li>
+        <li>
+          拡張機能がクリップボードの変更を検出し、貼り付けメニューが表示されるかを確認します
+        </li>
+      </ol>
+    </div>
+
+    <div class="section">
+      <h2>テキストコピーテスト</h2>
+      <div class="textarea-container">
+        <textarea
+          id="copyText"
+          placeholder="ここにテキストを入力してコピーテストを行います..."
+        ></textarea>
+      </div>
+      <button id="copyButton">テキストをコピー</button>
+      <button id="clearClipboard">クリップボードをクリア</button>
+      <div class="status" id="copyStatus">ステータス: 準備完了</div>
+
+      <h3>テストケース</h3>
+      <div class="test-cases">
+        <div class="test-case" data-text="これは単純なテストテキストです。">
+          シンプルテキスト
+        </div>
+        <div class="test-case" data-text="https://example.com">URL</div>
+        <div class="test-case" data-text="test@example.com">メールアドレス</div>
+        <div
+          class="test-case"
+          data-text="長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト長いテキスト"
+        >
+          長いテキスト
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>クリップボード内容確認</h2>
+      <button id="checkClipboard">現在のクリップボード内容を確認</button>
+      <div class="status" id="clipboardContent">
+        クリップボード内容: (まだ確認していません)
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const copyTextArea = document.getElementById("copyText");
+        const copyButton = document.getElementById("copyButton");
+        const copyStatus = document.getElementById("copyStatus");
+        const checkClipboardButton = document.getElementById("checkClipboard");
+        const clipboardContentDiv = document.getElementById("clipboardContent");
+        const clearClipboardButton = document.getElementById("clearClipboard");
+        const testCases = document.querySelectorAll(".test-case");
+
+        // テストケースクリック処理
+        testCases.forEach((testCase) => {
+          testCase.addEventListener("click", () => {
+            const text = testCase.getAttribute("data-text");
+            copyTextArea.value = text;
+            copyStatus.textContent = `ステータス: テストケース "${testCase.textContent}" を選択しました`;
+          });
+        });
+
+        // テキストコピー処理
+        copyButton.addEventListener("click", async () => {
+          const textToCopy = copyTextArea.value;
+
+          if (!textToCopy) {
+            copyStatus.textContent =
+              "ステータス: コピーするテキストを入力してください";
+            return;
+          }
+
+          try {
+            await navigator.clipboard.writeText(textToCopy);
+            copyStatus.textContent = `ステータス: テキストをコピーしました (${textToCopy.length} 文字)`;
+          } catch (err) {
+            copyStatus.textContent = `ステータス: コピーに失敗しました - ${err}`;
+            console.error("コピーに失敗しました:", err);
+          }
+        });
+
+        // クリップボード内容確認
+        checkClipboardButton.addEventListener("click", async () => {
+          try {
+            const text = await navigator.clipboard.readText();
+            clipboardContentDiv.textContent = `クリップボード内容: ${
+              text || "(空)"
+            }`;
+          } catch (err) {
+            clipboardContentDiv.textContent = `クリップボード読み取りに失敗しました - ${err}`;
+            console.error("クリップボード読み取りに失敗しました:", err);
+          }
+        });
+
+        // クリップボードクリア
+        clearClipboardButton.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText("");
+            copyStatus.textContent =
+              "ステータス: クリップボードをクリアしました";
+            copyTextArea.value = "";
+          } catch (err) {
+            copyStatus.textContent = `ステータス: クリップボードのクリアに失敗しました - ${err}`;
+            console.error("クリップボードのクリアに失敗しました:", err);
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
